@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Expense Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">Spendly</span>
+      </div>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">✕</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="dashboard">
+        <span class="nav-icon">◈</span> Dashboard
+      </button>
+      <button class="nav-item" data-view="transactions">
+        <span class="nav-icon">⇄</span> Transactions
+      </button>
+      <button class="nav-item" data-view="budgets">
+        <span class="nav-icon">◎</span> Budgets
+      </button>
+      <button class="nav-item" data-view="analytics">
+        <span class="nav-icon">∿</span> Analytics
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-balance-card">
+        <p class="balance-label">Net Balance</p>
+        <p class="balance-amount" id="sidebarBalance">₹0.00</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Layout -->
+  <div class="layout">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-actions">
+        <button class="btn-add" id="openAddModal">+ Add Expense</button>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">◑</button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- DASHBOARD VIEW -->
+      <section class="view active" id="view-dashboard">
+
+        <!-- Stat Cards -->
+        <div class="stats-grid">
+          <div class="stat-card stat-income">
+            <p class="stat-label">Total Income</p>
+            <p class="stat-value" id="totalIncome">₹0.00</p>
+            <span class="stat-badge">↑</span>
+          </div>
+          <div class="stat-card stat-expense">
+            <p class="stat-label">Total Expenses</p>
+            <p class="stat-value" id="totalExpense">₹0.00</p>
+            <span class="stat-badge">↓</span>
+          </div>
+          <div class="stat-card stat-balance">
+            <p class="stat-label">Net Balance</p>
+            <p class="stat-value" id="netBalance">₹0.00</p>
+            <span class="stat-badge">≈</span>
+          </div>
+          <div class="stat-card stat-count">
+            <p class="stat-label">Transactions</p>
+            <p class="stat-value" id="txCount">0</p>
+            <span class="stat-badge">#</span>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-row">
+          <div class="card chart-card">
+            <div class="card-header">
+              <h2>Spending by Category</h2>
+            </div>
+            <div class="donut-wrap">
+              <canvas id="categoryChart"></canvas>
+              <div class="donut-center" id="donutCenter">
+                <span class="donut-total" id="donutTotal">₹0</span>
+                <span class="donut-sub">total spend</span>
+              </div>
+            </div>
+            <div class="legend" id="categoryLegend"></div>
+          </div>
+
+          <div class="card chart-card">
+            <div class="card-header">
+              <h2>Monthly Trend</h2>
+              <select id="trendYear" class="mini-select"></select>
+            </div>
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Recent Activity</h2>
+            <button class="link-btn" data-view="transactions">View all →</button>
+          </div>
+          <div class="tx-list" id="recentList">
+            <div class="empty-state">
+              <p class="empty-icon">◌</p>
+              <p>No transactions yet. Add your first one!</p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- TRANSACTIONS VIEW -->
+      <section class="view" id="view-transactions">
+        <div class="card">
+          <div class="card-header">
+            <h2>All Transactions</h2>
+            <div class="filter-row">
+              <input type="text" id="searchInput" class="search-input" placeholder="Search…"/>
+              <select id="filterType" class="mini-select">
+                <option value="all">All Types</option>
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+              </select>
+              <select id="filterCategory" class="mini-select">
+                <option value="all">All Categories</option>
+              </select>
+              <select id="filterMonth" class="mini-select">
+                <option value="all">All Months</option>
+              </select>
+            </div>
+          </div>
+          <div class="tx-list" id="allTxList">
+            <div class="empty-state">
+              <p class="empty-icon">◌</p>
+              <p>No transactions found.</p>
+            </div>
+          </div>
+        </div>
+        <div class="export-row">
+          <button class="btn-secondary" id="exportCSV">↓ Export CSV</button>
+          <button class="btn-secondary" id="clearAll">✕ Clear All</button>
+        </div>
+      </section>
+
+      <!-- BUDGETS VIEW -->
+      <section class="view" id="view-budgets">
+        <div class="card">
+          <div class="card-header">
+            <h2>Category Budgets</h2>
+            <button class="btn-add" id="openBudgetModal">+ Set Budget</button>
+          </div>
+          <div class="budget-list" id="budgetList">
+            <div class="empty-state">
+              <p class="empty-icon">◌</p>
+              <p>No budgets set. Add one above!</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ANALYTICS VIEW -->
+      <section class="view" id="view-analytics">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <p class="stat-label">Highest Spend Day</p>
+            <p class="stat-value small" id="highDayVal">—</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Top Category</p>
+            <p class="stat-value small" id="topCatVal">—</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Avg Daily Spend</p>
+            <p class="stat-value small" id="avgDayVal">—</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Savings Rate</p>
+            <p class="stat-value small" id="savingsRate">—</p>
+          </div>
+        </div>
+
+        <div class="card chart-card">
+          <div class="card-header"><h2>Daily Spending — Last 30 Days</h2></div>
+          <canvas id="dailyChart"></canvas>
+        </div>
+
+        <div class="card chart-card">
+          <div class="card-header"><h2>Income vs Expense by Month</h2></div>
+          <canvas id="compareChart"></canvas>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ADD TRANSACTION MODAL -->
+  <div class="modal" id="addModal" role="dialog" aria-modal="true" aria-label="Add transaction">
+    <div class="modal-inner">
+      <div class="modal-header">
+        <h3>New Transaction</h3>
+        <button class="modal-close" id="closeAddModal" aria-label="Close">✕</button>
+      </div>
+
+      <div class="type-toggle">
+        <button class="type-btn active" data-type="expense">Expense</button>
+        <button class="type-btn" data-type="income">Income</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="txTitle">Title</label>
+          <input type="text" id="txTitle" placeholder="e.g. Lunch at Café"/>
+        </div>
+        <div class="form-group">
+          <label for="txAmount">Amount (₹)</label>
+          <input type="number" id="txAmount" placeholder="0.00" min="0" step="0.01"/>
+        </div>
+        <div class="form-group">
+          <label for="txCategory">Category</label>
+          <select id="txCategory"></select>
+        </div>
+        <div class="form-group">
+          <label for="txDate">Date</label>
+          <input type="date" id="txDate"/>
+        </div>
+        <div class="form-group full-width">
+          <label for="txNote">Note (optional)</label>
+          <input type="text" id="txNote" placeholder="Any extra details…"/>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-ghost" id="cancelAdd">Cancel</button>
+        <button class="btn-primary" id="saveTransaction">Save Transaction</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUDGET MODAL -->
+  <div class="modal" id="budgetModal" role="dialog" aria-modal="true" aria-label="Set budget">
+    <div class="modal-inner">
+      <div class="modal-header">
+        <h3>Set Budget</h3>
+        <button class="modal-close" id="closeBudgetModal">✕</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="budgetCategory">Category</label>
+          <select id="budgetCategory"></select>
+        </div>
+        <div class="form-group">
+          <label for="budgetAmount">Monthly Limit (₹)</label>
+          <input type="number" id="budgetAmount" placeholder="0.00" min="0" step="0.01"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" id="cancelBudget">Cancel</button>
+        <button class="btn-primary" id="saveBudget">Save Budget</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
